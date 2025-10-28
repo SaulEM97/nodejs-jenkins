@@ -46,7 +46,8 @@ pipeline {
                     sh """
                     ansible-playbook -i \$ANSIBLE_INVENTORY \$PLAYBOOK \
                       -u \$SSH_USER --private-key \$SSH_KEY \
-                      -e "artifact=${WORKSPACE}/node-jenkins.tar.gz"
+                      -e "artifact=${WORKSPACE}/node-jenkins.tar.gz" \
+		      -o StrictHostKeyChecking=no
                     """
                 }
             }

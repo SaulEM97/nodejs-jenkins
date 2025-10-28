@@ -5,7 +5,7 @@
   vars:
     app_dir: /opt/nodejs-jenkins
     node_version: "18.x"
-    artifact: "/tmp/node-jenkins.tar.gz"  # overwritten by Jenkins
+    artifact: "/tmp/node-jenkins.tar.gz"
 
   tasks:
 

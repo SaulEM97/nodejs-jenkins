@@ -43,7 +43,6 @@ pipeline {
          		)
        		]) {
        		sh """
-       		# Crear carpeta .ssh si no existe
        		mkdir -p ~/.ssh
        		chmod 700 ~/.ssh
 

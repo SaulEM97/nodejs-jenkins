@@ -33,6 +33,30 @@ pipeline {
                 '''
             }
         }
+	stage('Prepare SSH Known Hosts') {
+    	    steps {
+        	withCredentials([
+       			sshUserPrivateKey(
+               			credentialsId: 'ANSIBLE_SSH_KEY',
+               			keyFileVariable: 'SSH_KEY',
+               			usernameVariable: 'SSH_USER'
+         		)
+       		]) {
+       		sh """
+       		# Crear carpeta .ssh si no existe
+       		mkdir -p ~/.ssh
+       		chmod 700 ~/.ssh
+
+       		# Agregar las claves de los hosts EC2 al known_hosts
+       		for host in 44.206.225.202 54.211.207.6 18.212.185.61; do
+             		ssh-keyscan -H \$host >> ~/.ssh/known_hosts || true
+       		done
+
+       		chmod 644 ~/.ssh/known_hosts
+       		"""
+      		}
+	    }
+        }
 
         stage('Deploy via Ansible') {
             steps {
@@ -47,7 +71,6 @@ pipeline {
                     ansible-playbook -i \$ANSIBLE_INVENTORY \$PLAYBOOK \
                       -u \$SSH_USER --private-key \$SSH_KEY \
                       -e "artifact=${WORKSPACE}/node-jenkins.tar.gz" \
-		      -o StrictHostKeyChecking=no
                     """
                 }
             }

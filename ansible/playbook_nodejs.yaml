@@ -1,0 +1,62 @@
+---
+- name: Deploy Node.js application
+  hosts: all
+  become: yes
+  vars:
+    app_dir: /opt/nodejs-jenkins
+    node_version: "18.x"
+    artifact: "/tmp/node-jenkins.tar.gz"  # overwritten by Jenkins
+
+  tasks:
+
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy artifact to server
+      copy:
+        src: "{{ artifact }}"
+        dest: "{{ app_dir }}/node-jenkins.tar.gz"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Extract artifact
+      unarchive:
+        src: "{{ app_dir }}/node-jenkins.tar.gz"
+        dest: "{{ app_dir }}"
+        remote_src: yes
+
+    - name: Ensure curl is installed
+      apt:
+        name: curl
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Node.js (Debian-based systems)
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_{{ node_version }} | bash -
+        apt-get install -y nodejs
+      when: ansible_os_family == "Debian"
+
+    - name: Install pm2 globally
+      npm:
+        name: pm2
+        global: yes
+        state: present
+
+    - name: Install production dependencies
+      command: npm install --production
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Start application with pm2
+      shell: pm2 start index.js --name "nodejs-jenkins" -f
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: ubuntu
+

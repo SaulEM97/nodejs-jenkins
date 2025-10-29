@@ -47,7 +47,7 @@ pipeline {
        		chmod 700 ~/.ssh
 
        		# Agregar las claves de los hosts EC2 al known_hosts
-       		for host in 44.206.225.202 54.211.207.6 18.212.185.61; do
+       		for host in 3.81.20.118 54.92.187.160 34.230.65.171; do
              		ssh-keyscan -H \$host >> ~/.ssh/known_hosts || true
        		done
 
